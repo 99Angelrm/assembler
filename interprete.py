@@ -77,21 +77,23 @@ def t_error(t):
 
 
 lexer = lex.lex()
-doc = """
-// Example 8.4
-// This program counts the number of words not equal
-// to 0 in data memory locations 4 and 5, storing
-// the final count in R0
-
-MOV R0, #0; // initialize result to 0
-MOV R1, #1; // constant 1 for incrementing result
-MOV R2, 4; // get data memory location 4
-JMPZ R2, lab1; // if zero, skip next instruction
-ADD R0, R0, R1; // not zero, so increment result
-lab1: MOV R2, 5; // get data memory location 5
-JMPZ R2, lab2; // if zero, skip next instruction
-ADD R0, R0, R1; //not zero, so increment result
-lab2: MOV 9, R0; // store result in data memory location 9
+doc = """MOV R1, #2; // Load R1 with constant 2
+MOV R2, #3; // Load R1 with constant 3
+ADD R3, R1, R2; // Adds 2+3, R3 gets result of 5
+// Data memory example
+MOV R0, #99; // Load R0 with constant 99
+MOV 3, R0; // Store R0 (99) to DMEM[3]
+MOV R1, #1; // Load R1 with constant 1
+MOV R2, 3; // Load R2 with DMEM[3] (which is 99)
+ADD R3, R2, R1; // R3 gets result of 100
+// Jump example
+MOV R0, #0; // Running sum
+MOV R1, #1; // Constant 1 for increment
+MOV R2, #0; // Constant 0 for use in later JMPZ
+label1: ADD R0, R0, R1; // Add 1 to R0
+JMPZ R2, label1; // Jump to ADD instruction again
+// Above is an infinite loop
+// R0 should continue to increment 
 """
 lexer.input(doc)  # dar al lexer una entrada
 
@@ -163,8 +165,9 @@ def p_expresion_INSTRUCCION_LOAD_CONSTANT(p):
     "INSTRUCCION : MOV REGISTER COMMA CONSTANT"
     nemonic = "0011"
     register = "{0:04b}".format(int(str(p[2]).replace("R", '')))
+    number=tobin(int(str(p[4]).replace("#", '')))
     constant = "{0:08b}".format(int(str(p[4]).replace("#", '')))
-    p[0] = nemonic+register+constant
+    p[0] = nemonic+register+number
 
 
 def p_expresion_INSTRUCCION_SUBSTRACT(p):
